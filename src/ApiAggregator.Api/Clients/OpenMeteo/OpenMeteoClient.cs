@@ -23,7 +23,7 @@ public sealed class OpenMeteoClient(HttpClient httpClient) : IExternalApiClient
         var url = FormattableString.Invariant(
             $"{ForecastUrl}?latitude={location.Latitude}&longitude={location.Longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3");
 
-        var forecast = await httpClient.GetFromJsonAsync<Forecastresponse>(url, cancellationToken);
+        var forecast = await httpClient.GetFromJsonAsync<ForecastResponse>(url, cancellationToken);
         if (forecast is null)
         {
             return [];
@@ -46,7 +46,7 @@ public sealed class OpenMeteoClient(HttpClient httpClient) : IExternalApiClient
     private async Task<GeoLocation?> FindLocationAsync(string city, CancellationToken cancellationToken)
     {
         var url = $"{GeocodingUrl}?name={Uri.EscapeDataString(city)}&count=1";
-        var response = await httpClient.GetFromJsonAsync<GeoCodingResponse>(url, cancellationToken);
+        var response = await httpClient.GetFromJsonAsync<GeocodingResponse>(url, cancellationToken);
         return response?.Results?.FirstOrDefault();
     }
 
