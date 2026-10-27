@@ -1,8 +1,12 @@
+using ApiAggregator.Api.Clients;
+using ApiAggregator.Api.Clients.OpenMeteo;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient<IExternalApiClient, OpenMeteoClient>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
