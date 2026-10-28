@@ -9,6 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.ConfigureHttpClientDefaults(http => http.AddStandardResilienceHandler(options =>
+{
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(3);
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);
+    options.Retry.Delay = TimeSpan.FromMilliseconds(300);
+}));
 builder.Services.AddScoped<IAggregationService, AggregationService>();
 builder.Services.AddHttpClient<IExternalApiClient, OpenMeteoClient>(nameof(OpenMeteoClient));
 builder.Services.AddHttpClient<IExternalApiClient, HackerNewsClient>(nameof(HackerNewsClient));
