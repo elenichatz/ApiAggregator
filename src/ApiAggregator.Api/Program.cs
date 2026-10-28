@@ -2,12 +2,14 @@ using ApiAggregator.Api.Clients;
 using ApiAggregator.Api.Clients.OpenMeteo;
 using ApiAggregator.Api.Clients.HackerNews;
 using ApiAggregator.Api.Clients.GitHub;
+using ApiAggregator.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IAggregationService, AggregationService>();
 builder.Services.AddHttpClient<IExternalApiClient, OpenMeteoClient>(nameof(OpenMeteoClient));
 builder.Services.AddHttpClient<IExternalApiClient, HackerNewsClient>(nameof(HackerNewsClient));
 builder.Services.AddHttpClient<IExternalApiClient, GitHubClient>(nameof(GitHubClient), client =>
