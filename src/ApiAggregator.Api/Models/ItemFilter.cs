@@ -1,5 +1,11 @@
 namespace ApiAggregator.Api.Models;
 
+/// <summary>Optional filtering and sorting applied to the aggregated items.</summary>
+/// <param name="Category">Keep only this category: news, code or weather (case-insensitive).</param>
+/// <param name="From">Keep items on or after this date, e.g. 2026-10-01.</param>
+/// <param name="To">Keep items on or before this date.</param>
+/// <param name="SortBy">Date (default) or Relevance (score: HN points / GitHub stars).</param>
+/// <param name="Order">Desc (default) or Asc.</param>
 public sealed record ItemFilter(
     string? Category = null,
     DateTimeOffset? From = null,
