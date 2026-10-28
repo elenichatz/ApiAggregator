@@ -10,10 +10,10 @@ public sealed class AggregationController(IAggregationService aggregationService
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<AggregatedItem>>> Get([FromQuery] string keyword, [FromQuery] string city,
-        CancellationToken cancellationToken)
+        [FromQuery] ItemFilter filter, CancellationToken cancellationToken)
     {
         var items = await aggregationService.AggregateAsync(new FetchRequest(keyword, city), cancellationToken);
 
-        return Ok(items);
+        return Ok(filter.Apply(items));
     }
 }

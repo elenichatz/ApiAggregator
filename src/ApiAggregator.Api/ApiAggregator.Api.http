@@ -8,3 +8,23 @@ GET {{ApiAggregator.Api_HostAddress}}/api/aggregate?keyword=dotnet
 Accept: application/json
 
 ###
+
+GET {{ApiAggregator.Api_HostAddress}}/api/aggregate?keyword=dotnet&city=Athens&category=news
+Accept: application/json
+
+###
+
+GET {{ApiAggregator.Api_HostAddress}}/api/aggregate?keyword=dotnet&city=Athens&sortBy=relevance
+Accept: application/json
+
+###
+
+GET {{ApiAggregator.Api_HostAddress}}/api/aggregate?keyword=dotnet&city=Athens&sortBy=date&order=asc
+Accept: application/json
+
+###
+
+GET {{ApiAggregator.Api_HostAddress}}/api/aggregate?keyword=dotnet&city=Athens&sortBy=popularity
+Accept: application/json
+
+###
