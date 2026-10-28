@@ -10,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<RequestStatsStore>();
-builder.Services.AddTransient<RequestStatsHandler>();
 builder.Services.ConfigureHttpClientDefaults(http =>
 {
     http.AddStandardResilienceHandler(options =>
@@ -19,7 +18,6 @@ builder.Services.ConfigureHttpClientDefaults(http =>
         options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);
         options.Retry.Delay = TimeSpan.FromMilliseconds(300);
     });
-    http.AddHttpMessageHandler<RequestStatsHandler>();
 });
 
 builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection(CacheOptions.SectionName));
@@ -27,13 +25,13 @@ builder.Services.AddMemoryCache(options => options.SizeLimit = 1000);
 builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddScoped<IAggregationService, AggregationService>();
-builder.Services.AddHttpClient<IExternalApiClient, OpenMeteoClient>(nameof(OpenMeteoClient));
-builder.Services.AddHttpClient<IExternalApiClient, HackerNewsClient>(nameof(HackerNewsClient));
-builder.Services.AddHttpClient<IExternalApiClient, GitHubClient>(nameof(GitHubClient), client =>
+builder.Services.AddHttpClient<IExternalApiClient, OpenMeteoClient>(OpenMeteoClient.SourceName).AddRequestStats();
+builder.Services.AddHttpClient<IExternalApiClient, HackerNewsClient>(HackerNewsClient.SourceName).AddRequestStats();
+builder.Services.AddHttpClient<IExternalApiClient, GitHubClient>(GitHubClient.SourceName, client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("ApiAggregator/1.0");
     client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
-});
+}).AddRequestStats();
 
 builder.Services.AddOpenApi();
 

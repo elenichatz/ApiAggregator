@@ -99,24 +99,25 @@ At least one of `keyword` or `city` is required. A source that cannot use the re
 
 ### `GET /api/stats`
 
-Request statistics for every external API host called since the service started.
+Request statistics for every external API called since the service started.
 
 ```json
 [
   {
-    "api": "api.github.com",
+    "api": "github",
     "totalRequests": 12,
     "averageResponseMs": 451.3,
-    "fast": 0,
-    "average": 3,
-    "slow": 9
+    "fast": { "requests": 0, "averageResponseMs": 0 },
+    "average": { "requests": 3, "averageResponseMs": 162.4 },
+    "slow": { "requests": 9, "averageResponseMs": 547.6 }
   }
 ]
 ```
 
 Each outgoing HTTP request is put into a performance bucket: `fast` < 100 ms, `average` 100–200 ms, `slow` > 200 ms.
+Every bucket reports its number of requests and their average response time; `totalRequests` and `averageResponseMs` cover all buckets together.
 Every attempt counts, retries included; cache hits make no request and are not counted.
-Open-Meteo appears as two hosts (`geocoding-api.open-meteo.com` and `api.open-meteo.com`) because the client makes a geocoding call and a forecast call.
+`api` is the source name used in `/api/aggregate`. Open-Meteo's geocoding and forecast calls are both counted under `openmeteo`.
 
 ## Configuration
 
@@ -167,7 +168,7 @@ tests/ApiAggregator.Tests
 - **Resilience at the transport layer.** `AddStandardResilienceHandler` (Polly) applies to every client: 3 s per attempt, retries with exponential backoff and jitter for transient errors (5xx, 408, 429, network), a circuit breaker, and 10 s in total.
 - **Fallback at the application layer.** Each source is wrapped in its own `try/catch`, so one failing API never fails the whole request. If the client cancels the request, the cancellation is not reported as a source failure.
 - **Cache per source, before filtering.** Each source's raw items are cached under `source|keyword|city`, with keyword and city trimmed and lower-cased. Only successful results are cached, so a failed source is retried on the next request. Filtering and sorting run after the cache, so `?category=news` and `?sortBy=date` reuse the same cached data. The cache uses the **stale-if-error** pattern and is limited to 1000 entries so that random keywords cannot fill the memory.
-- **Thread-safe statistics.** A `DelegatingHandler` sits inside the resilience handler and times each attempt. The store uses a `ConcurrentDictionary` with a lock per API, so counts and totals always stay consistent with each other.
+- **Thread-safe statistics.** A `DelegatingHandler` sits inside the resilience handler and times each attempt. It is added to each typed client with `.AddRequestStats()` and records under the client's name, so one source with several hosts is still one API. The store uses a `ConcurrentDictionary` with a lock per API, so counts and totals always stay consistent with each other.
 - **Testable time.** Cache expiry and request timing use `TimeProvider`, so tests can move a fake clock forward instead of waiting.
 
 ## Tests
@@ -178,11 +179,13 @@ tests/ApiAggregator.Tests
 |---|---|
 | `ItemFilter` | category filter (case-insensitive), date range, default sort, relevance asc/desc incl. items without score |
 | `AggregationService` | combining sources, partial results on failure, skipped sources, cache hit (with key normalisation), refresh after expiry, stale fallback, cancellation |
-| `RequestStatsStore` | bucket boundaries (100 / 200 ms), average, per-API separation, 10,000 concurrent writes |
-| `RequestStatsHandler` | timing with a fake clock, failed requests are still counted |
+| `RequestStatsStore` | bucket boundaries (100 / 200 ms), overall and per-bucket averages, per-API separation, 10,000 concurrent writes |
+| `RequestStatsHandler` | timing with a fake clock, recorded under the API name, failed requests are still counted |
 | `GitHubClient`, `OpenMeteoClient` | JSON → `AggregatedItem` mapping, URL encoding, culture-invariant coordinates, HTTP errors, unknown city |
 
 The fakes used are a fake `IExternalApiClient`, a stub `HttpMessageHandler` that returns canned JSON, and `FakeTimeProvider`.
+
+GitHub Actions (`.github/workflows/ci.yml`) builds the solution and runs the tests on every push to `main` and on every pull request.
 
 ## Known limitations and possible improvements
 

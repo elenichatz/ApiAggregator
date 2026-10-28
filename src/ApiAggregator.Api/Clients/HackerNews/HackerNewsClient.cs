@@ -6,8 +6,10 @@ namespace ApiAggregator.Api.Clients.HackerNews;
 public sealed class HackerNewsClient(HttpClient httpClient) : IExternalApiClient
 {
     private const string SearchUrl = "https://hn.algolia.com/api/v1/search";
+    
+    public const string SourceName = "hackernews";
 
-    public string Name => "hackernews";
+    public string Name => SourceName;
     
     public bool CanHandle(FetchRequest request) => request.HasKeyword;
 

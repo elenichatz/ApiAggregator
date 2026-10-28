@@ -1,4 +1,5 @@
 using ApiAggregator.Api.Stats;
+using ApiAggregator.Api.Models;
 
 namespace ApiAggregator.Tests;
 
@@ -23,9 +24,9 @@ public class RequestStatsStoreTests
         var stats = Assert.Single(store.GetSnapshot());
         Assert.Equal(5, stats.TotalRequests);
         Assert.Equal(150, stats.AverageResponseMs);
-        Assert.Equal(1, stats.Fast);
-        Assert.Equal(3, stats.Average);
-        Assert.Equal(1, stats.Slow);
+        Assert.Equal(new BucketStats(1, 50), stats.Fast);
+        Assert.Equal(new BucketStats(3, 150), stats.Average);
+        Assert.Equal(new BucketStats(1, 250), stats.Slow);
     }
 
     [Fact]

@@ -8,7 +8,9 @@ public sealed class OpenMeteoClient(HttpClient httpClient) : IExternalApiClient
     private const string GeocodingUrl = "https://geocoding-api.open-meteo.com/v1/search";
     private const string ForecastUrl = "https://api.open-meteo.com/v1/forecast";
 
-    public string Name => "openmeteo";
+    public const string SourceName = "openmeteo";
+
+    public string Name => SourceName;
     
     public bool CanHandle(FetchRequest request) => request.HasCity;
 

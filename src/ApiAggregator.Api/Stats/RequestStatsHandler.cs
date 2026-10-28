@@ -1,6 +1,6 @@
 namespace ApiAggregator.Api.Stats;
 
-public sealed class RequestStatsHandler(RequestStatsStore store, TimeProvider timeProvider) : DelegatingHandler
+public sealed class RequestStatsHandler(RequestStatsStore store, TimeProvider timeProvider, string api) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -11,7 +11,7 @@ public sealed class RequestStatsHandler(RequestStatsStore store, TimeProvider ti
         }
         finally
         {
-            store.Record(request.RequestUri?.Host ?? "unknown", timeProvider.GetElapsedTime(start));
+            store.Record(api, timeProvider.GetElapsedTime(start));
         }
     }
 }

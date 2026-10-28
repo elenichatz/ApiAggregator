@@ -11,10 +11,10 @@ public class RequestStatsHandlerTests
     private readonly FakeTimeProvider timeProvider = new();
 
     private HttpClient CreateClient(Func<HttpRequestMessage, HttpResponseMessage> respond) =>
-        new(new RequestStatsHandler(store, timeProvider) { InnerHandler = new StubHttpMessageHandler(respond) });
+        new(new RequestStatsHandler(store, timeProvider, "example") { InnerHandler = new StubHttpMessageHandler(respond) });
 
     [Fact]
-    public async Task SendAsync_RecordsElapsedTimeUnderTheHost()
+    public async Task SendAsync_RecordsElapsedTimeUnderTheApiName()
     {
         using var client = CreateClient(_ =>
         {
@@ -25,9 +25,9 @@ public class RequestStatsHandlerTests
         await client.GetAsync("https://api.example.com/search?q=x");
 
         var stats = Assert.Single(store.GetSnapshot());
-        Assert.Equal("api.example.com", stats.Api);
+        Assert.Equal("example", stats.Api);
         Assert.Equal(150, stats.AverageResponseMs);
-        Assert.Equal(1, stats.Average);
+        Assert.Equal(1, stats.Average.Requests);
     }
 
     [Fact]

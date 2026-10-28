@@ -12,34 +12,28 @@ public sealed class RequestStatsStore
     public IReadOnlyList<ApiStats> GetSnapshot() => counters
         .OrderBy(pair => pair.Key).Select(pair => pair.Value.ToStats(pair.Key)).ToList();
 
+    private static double Average(double totalMilliseconds, long count) =>
+        count == 0 ? 0 : Math.Round(totalMilliseconds / count, 1);
+
     private sealed class Counter
     {
         private readonly Lock gate = new();
-        private long count;
-        private double totalMilliseconds;
-        private long fast;
-        private long average;
-        private long slow;
+        private readonly Bucket fast = new();
+        private readonly Bucket average = new();
+        private readonly Bucket slow = new();
 
         public void Add(TimeSpan elapsed)
         {
             var milliseconds = elapsed.TotalMilliseconds;
+            var bucket = milliseconds switch
+            {
+                < 100 => fast,
+                <= 200 => average,
+                _ => slow
+            };
             lock (gate)
             {
-                count++;
-                totalMilliseconds += milliseconds;
-                if (milliseconds < 100)
-                {
-                    fast++;
-                }
-                else if (milliseconds <= 200)
-                {
-                    average++;
-                }
-                else
-                {
-                    slow++;
-                }
+                bucket.Add(milliseconds);
             }
         }
 
@@ -47,8 +41,25 @@ public sealed class RequestStatsStore
         {
             lock (gate)
             {
-                return new ApiStats(api, count, Math.Round(totalMilliseconds / count, 1), fast, average, slow);
+                var count = fast.Count + average.Count + slow.Count;
+                var totalMilliseconds = fast.TotalMilliseconds + average.TotalMilliseconds + slow.TotalMilliseconds;
+                return new ApiStats(api, count, Average(totalMilliseconds, count),
+                    fast.ToStats(), average.ToStats(), slow.ToStats());
             }
         }
+    }
+
+    private sealed class Bucket
+    {
+        public long Count { get; private set; }
+        public double TotalMilliseconds { get; private set; }
+
+        public void Add(double milliseconds)
+        {
+            Count++;
+            TotalMilliseconds += milliseconds;
+        }
+
+        public BucketStats ToStats() => new(Count, Average(TotalMilliseconds, Count));
     }
 }

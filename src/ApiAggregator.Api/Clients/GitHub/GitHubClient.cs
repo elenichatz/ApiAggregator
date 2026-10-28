@@ -6,8 +6,10 @@ namespace ApiAggregator.Api.Clients.GitHub;
 public sealed class GitHubClient(HttpClient httpClient) : IExternalApiClient
 {
     private const string SearchUrl = "https://api.github.com/search/repositories";
+    
+    public const string SourceName = "github";
 
-    public string Name => "github";
+    public string Name => SourceName;
     
     public bool CanHandle(FetchRequest request) => request.HasKeyword;
 

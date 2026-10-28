@@ -1,3 +1,11 @@
 namespace ApiAggregator.Api.Models;
 
-public sealed record ApiStats(string Api, long TotalRequests, double AverageResponseMs, long Fast, long Average, long Slow);
+public sealed record ApiStats(
+    string Api,
+    long TotalRequests,
+    double AverageResponseMs,
+    BucketStats Fast,
+    BucketStats Average,
+    BucketStats Slow);
+    
+public sealed record BucketStats(long Requests, double AverageResponseMs);
