@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using ApiAggregator.Api.Models;
 using ApiAggregator.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace ApiAggregator.Api.Controllers;
 public sealed class AggregationController(IAggregationService aggregationService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<AggregatedItem>>> Get([FromQuery] string keyword, [FromQuery] string city,
+    public async Task<ActionResult<IReadOnlyList<AggregatedItem>>> Get([FromQuery, Required] string keyword, [FromQuery, Required] string city,
         [FromQuery] ItemFilter filter, CancellationToken cancellationToken)
     {
         var items = await aggregationService.AggregateAsync(new FetchRequest(keyword, city), cancellationToken);
