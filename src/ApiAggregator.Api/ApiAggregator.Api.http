@@ -1,6 +1,10 @@
 @ApiAggregator.Api_HostAddress = http://localhost:5088
 
-GET {{ApiAggregator.Api_HostAddress}}/weatherforecast/
+GET {{ApiAggregator.Api_HostAddress}}/api/aggregate?keyword=dotnet&city=Athens
+Accept: application/json
+
+###
+GET {{ApiAggregator.Api_HostAddress}}/api/aggregate?keyword=dotnet
 Accept: application/json
 
 ###
