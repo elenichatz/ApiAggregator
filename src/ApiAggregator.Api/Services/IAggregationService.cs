@@ -4,6 +4,6 @@ namespace ApiAggregator.Api.Services;
 
 public interface IAggregationService
 {
-    Task<IReadOnlyList<AggregatedItem>> AggregateAsync(FetchRequest request, CancellationToken cancellationToken);
+    Task<AggregationResult> AggregateAsync(FetchRequest request, CancellationToken cancellationToken);
 }
 

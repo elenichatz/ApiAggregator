@@ -10,11 +10,11 @@ namespace ApiAggregator.Api.Controllers;
 public sealed class AggregationController(IAggregationService aggregationService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<AggregatedItem>>> Get([FromQuery, Required] string keyword, [FromQuery, Required] string city,
+    public async Task<ActionResult<AggregationResult>> Get([FromQuery, Required] string keyword, [FromQuery, Required] string city,
         [FromQuery] ItemFilter filter, CancellationToken cancellationToken)
     {
-        var items = await aggregationService.AggregateAsync(new FetchRequest(keyword, city), cancellationToken);
+        var result = await aggregationService.AggregateAsync(new FetchRequest(keyword, city), cancellationToken);
 
-        return Ok(filter.Apply(items));
+        return Ok(result with { Items = filter.Apply(result.Items) });
     }
 }
