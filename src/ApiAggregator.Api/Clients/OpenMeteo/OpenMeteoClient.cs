@@ -10,10 +10,17 @@ public sealed class OpenMeteoClient(HttpClient httpClient) : IExternalApiClient
     private const string ForecastUrl = "https://api.open-meteo.com/v1/forecast";
 
     public string Name => "openmeteo";
+    
+    public bool CanHandle(FetchRequest request) => request.HasCity;
 
     public async Task<IReadOnlyList<AggregatedItem>> FetchAsync(FetchRequest request,
         CancellationToken cancellationToken)
     {
+        if (!request.HasCity)
+        {
+            return [];
+        }
+        
         var location = await FindLocationAsync(request.City, cancellationToken);
         if (location is null)
         {

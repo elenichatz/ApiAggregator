@@ -19,6 +19,11 @@ public sealed class AggregationService(IEnumerable<IExternalApiClient> clients, 
     private async Task<SourceResult> FetchSafelyAsync(IExternalApiClient client, FetchRequest request,
         CancellationToken cancellationToken)
     {
+        if (!client.CanHandle(request))
+        {
+            return new SourceResult([], new SourceStatus(client.Name, SourceState.Skipped, Error: null));
+        }
+        
         try
         {
             var items = await client.FetchAsync(request, cancellationToken);

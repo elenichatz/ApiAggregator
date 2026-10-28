@@ -8,10 +8,17 @@ public sealed class GitHubClient(HttpClient httpClient) : IExternalApiClient
     private const string SearchUrl = "https://api.github.com/search/repositories";
 
     public string Name => "github";
+    
+    public bool CanHandle(FetchRequest request) => request.HasKeyword;
 
     public async Task<IReadOnlyList<AggregatedItem>> FetchAsync(FetchRequest request,
         CancellationToken cancellationToken)
     {
+        if (!request.HasKeyword)
+        {
+            return [];
+        }
+        
         var url = $"{SearchUrl}?q={Uri.EscapeDataString(request.Keyword)}&sort=stars&order=desc&per_page=10";
 
         var response = await httpClient.GetFromJsonAsync<GitHubSearchResponse>(url, cancellationToken);
