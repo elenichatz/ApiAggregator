@@ -16,6 +16,11 @@ builder.Services.ConfigureHttpClientDefaults(http => http.AddStandardResilienceH
     options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);
     options.Retry.Delay = TimeSpan.FromMilliseconds(300);
 }));
+
+builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection(CacheOptions.SectionName));
+builder.Services.AddMemoryCache(options => options.SizeLimit = 1000);
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.AddScoped<IAggregationService, AggregationService>();
 builder.Services.AddHttpClient<IExternalApiClient, OpenMeteoClient>(nameof(OpenMeteoClient));
 builder.Services.AddHttpClient<IExternalApiClient, HackerNewsClient>(nameof(HackerNewsClient));

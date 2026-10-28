@@ -6,6 +6,8 @@ namespace ApiAggregator.Api.Models;
 public enum SourceState
 {
     Succeeded,
+    Cached,
+    Stale,
     Failed,
     Skipped
 }
