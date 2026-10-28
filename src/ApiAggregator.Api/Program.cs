@@ -7,8 +7,6 @@ using ApiAggregator.Api.Stats;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<RequestStatsStore>();
@@ -24,7 +22,6 @@ builder.Services.ConfigureHttpClientDefaults(http =>
     http.AddHttpMessageHandler<RequestStatsHandler>();
 });
 
-
 builder.Services.Configure<CacheOptions>(builder.Configuration.GetSection(CacheOptions.SectionName));
 builder.Services.AddMemoryCache(options => options.SizeLimit = 1000);
 builder.Services.AddSingleton(TimeProvider.System);
@@ -38,7 +35,6 @@ builder.Services.AddHttpClient<IExternalApiClient, GitHubClient>(nameof(GitHubCl
     client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
 });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -48,7 +44,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "ApiAggregator v1"));
-
 }
 
 app.UseHttpsRedirection();

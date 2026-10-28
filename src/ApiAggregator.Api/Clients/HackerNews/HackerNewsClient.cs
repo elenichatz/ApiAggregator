@@ -22,7 +22,7 @@ public sealed class HackerNewsClient(HttpClient httpClient) : IExternalApiClient
         var url = $"{SearchUrl}?query={Uri.EscapeDataString(request.Keyword)}&tags=story&hitsPerPage=10";
         
         var response = await httpClient.GetFromJsonAsync<HackerNewsSearchResponse>(url, cancellationToken);
-        if (response == null)
+        if (response is null)
         {
             return [];
         }
